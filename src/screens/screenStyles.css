@@ -1,0 +1,9 @@
+.itemCenter {
+    align-items: center;
+    display: flex;
+    font-weight: bold;
+}
+
+.subCateListItem {
+    color: red;
+}
