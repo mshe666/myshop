@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import {Button, Form, FormGroup, Label, Input, FormText, Container, Row, Col} from 'reactstrap';
 import firebase from "../firebase/firebase";
+import * as routes from "../constants/routes";
+import { Redirect } from 'react-router';
+
 
 export default class signup extends React.Component {
 
@@ -11,11 +14,13 @@ export default class signup extends React.Component {
             email: null,
             password: null,
             cPassword: null,
+            toHome: false,
         };
 
         this._handleChange = this._handleChange.bind(this);
         this._handleSubmit = this._handleSubmit.bind(this);
         this._createAccount = this._createAccount.bind(this);
+        this._createUserInDB = this._createUserInDB.bind(this);
     }
 
 
@@ -32,9 +37,42 @@ export default class signup extends React.Component {
             alert("Two passwords are different!");
         } else {
             this._createAccount(email, password);
+            this.setState({
+                toHome: true
+            });
             // alert("sign up successfully!");
+            // this._createUserInDB();
+
+
         }
 
+    };
+
+    componentDidMount() {
+        firebase.auth().onAuthStateChanged(authUser => {
+            authUser
+                ? this._createUserInDB()
+                : null;
+        });
+    }
+
+
+
+    _createUserInDB = () => {
+
+        let currentUser = firebase.auth().currentUser;
+        let email = currentUser.email;
+        let uid = currentUser.uid;
+
+        let user = {uid: uid, email: email}
+
+        // alert("user email = " + email);s
+        //
+        firebase.database().ref('users/' + uid).set(user).then(() => {
+            console.log('INSERTED a new user!');
+        }).catch(error => {
+            console.log('signup.js _handleSubmit: error = ' + error);
+        });
     };
 
     _createAccount = (email, password) => {
@@ -49,6 +87,10 @@ export default class signup extends React.Component {
 
 
     render() {
+        if (this.state.toHome) {
+            return <Redirect to={routes.LANDING} />
+        }
+
         return (
             <Container>
                 <Row>

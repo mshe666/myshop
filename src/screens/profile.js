@@ -1,11 +1,15 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import Item from '../components/item';
 import PropTypes from 'prop-types';
-import {Container, Row, Col} from 'reactstrap';
+import {Container, Row, Col, Table} from 'reactstrap';
 import AuthUserContext from '../components/AuthUserContext';
 import firebase from '../firebase/firebase';
 import * as routes from "../constants/routes";
-import { Redirect } from 'react-router';
+import {Redirect} from 'react-router';
+import withAuthorization from '../components/withAuthorization';
+
+
+const authCondition = (authUser) => !!authUser;
 
 
 class profile extends Component {
@@ -13,57 +17,88 @@ class profile extends Component {
     constructor(props) {
         super(props);
 
-        this._checkAuth = this._checkAuth.bind(this);
+
+        this._loadUserInfo = this._loadUserInfo.bind(this);
+
     }
 
-
-    _checkAuth = (authUser) => {
-
+    _loadUserInfo = () => {
         let user = firebase.auth().currentUser;
-        let name = "None";
-        let email = "None";
-        let photoUrl = "None";
-        let emailVerified = "None";
-        let uid = "None";
+        let currentUID = null;
 
         if (user != null) {
-            name = user.displayName;
-            email = user.email;
-            photoUrl = user.photoURL;
-            emailVerified = user.emailVerified;
-            uid = user.uid;
+            console.log("user is not null!");
+            currentUID = user.uid;
+            let infoToLoad = [];
+
+            firebase.database().ref('users').on('value', (data) => {
+
+                    data.forEach((item) => {
+                        let uid = item.child('uid').val();
+                        console.log("uid = " + uid);
+                        if ( uid === currentUID) {
+                            console.log("enter uid === currentUID");
+                            let email = item.child('email').val();
+                            let fname = item.child('fname').val();
+                            let lname = item.child('lname').val();
+                            let mobile = item.child('mobile').val();
+                            let addresses = item.child('addresses').val();
+                            let cart = item.child('cart').val();
+                            let orders = item.child('orders').val();
+
+                            infoToLoad = [
+                                {key: "Email", value: email},
+                                {key: "First Name", value: fname},
+                                {key: "Last Name", value: lname},
+                                {key: "Mobile", value: mobile},
+                                ];
+
+                            console.log("infoToLoad = " + infoToLoad);
+
+                            return (
+                                infoToLoad.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.key}</td>
+                                        <td>{item.value}</td>
+                                    </tr>
+                                ))
+                            );
+                        }
+
+
+                    });
+
+                }, (error => {
+                    console.log("loading users error! " + error);
+                })
+            );
+
         }
 
-        if (authUser) {
-            console.log("this is an auth user!");
 
-            return (
-                <Container>
-                    <Row>
-                        <Col xs={12}>
-                            Profile! member! {email} {uid}
-                        </Col>
-                    </Row>
-                </Container>
-            );
-        } else {
-            console.log("this is guest!");
-            // alert("please sign in first!");
-            return (
-                <Redirect to={routes.SIGN_IN} />
-            );
-        }
+
+
     };
-
 
     render() {
 
+
+
         return (
-            <AuthUserContext.Consumer>
-                {this._checkAuth}
-            </AuthUserContext.Consumer>
+            <Container>
+                <Row>
+                    <Col xs={12}>
+                        Profile! member!
+                        <Table>
+                            <tbody>
+                            {this._loadUserInfo()}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row>
+            </Container>
         );
     }
 }
 
-export default profile;
+export default withAuthorization(authCondition)(profile);
