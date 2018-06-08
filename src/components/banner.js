@@ -12,6 +12,8 @@ import {Link} from 'react-router-dom';
 import {Route, Switch} from 'react-router';
 import SearchIcon from '@material-ui/icons/Search';
 import SearchResults from "../screens/searchresults";
+import * as routes from '../constants/routes';
+
 
 
 export default class banner extends Component {
@@ -50,8 +52,8 @@ export default class banner extends Component {
             <Container>
                 <Row className={"itemCenter"}>
                     <Col xs={12} md={8} lg={3}>
-                        <img width="100%"
-                             src={"http://via.placeholder.com/350x100"}
+                        <img width={"100%"}
+                             src={routes.LOGO_2}
                              alt="Website logo"/>
                     </Col>
                     <Col xs={12} md={8} lg={6}>
@@ -61,14 +63,14 @@ export default class banner extends Component {
 
                             <InputGroupAddon addonType="append">
                                 <Link to={'/searchresults'}>
-                                    <Button color="secondary"><SearchIcon/></Button>
+                                    <Button color="primary"><SearchIcon/></Button>
                                 </Link>
                             </InputGroupAddon>
                         </InputGroup>
                     </Col>
                     <Col xs={12} md={8} lg={3}>
                         <img width="100%"
-                             src={"http://via.placeholder.com/350x100"}
+                             src={routes.LOGO_2}
                              alt="Website logo"/>
                     </Col>
                     <Switch>

@@ -20,7 +20,7 @@ export default class SignOutButton extends React.Component {
 
     render() {
         return (
-            <Button onClick={this._signOut}>
+            <Button color={"primary"} onClick={this._signOut}>
                 Sign Out
             </Button>
         );
