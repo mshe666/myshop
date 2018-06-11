@@ -11,6 +11,8 @@ import Baby from './screens/baby';
 import Beauty from './screens/beauty';
 import Category from './screens/category';
 import Profile from './screens/profile';
+import ShoppingCart from './screens/shoppingCart';
+import DeliveryPayment from './screens/deliveryAndPayment';
 import Signup from './screens/signup';
 import Signin from './screens/signin';
 import Admin from './screens/admin';
@@ -33,6 +35,8 @@ const App = () =>
             <Route path={routes.BABY} component={() => <Baby/>}/>
             <Route path={routes.BEAUTY} component={() => <Beauty/>}/>
             <Route path={routes.CATEGORY} component={() => <Category/>}/>
+            <Route path={routes.SHOPPING_CART} component={() => <ShoppingCart/>}/>
+            <Route path={routes.DELIVERY_PAYMENT} component={() => <DeliveryPayment/>}/>
             <Route path={routes.PROFILE} component={() => <Profile/>}/>
             <Route path={routes.SIGN_UP} component={() => <Signup/>}/>
             <Route path={routes.SIGN_IN} component={() => <Signin/>}/>

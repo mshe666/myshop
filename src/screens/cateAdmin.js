@@ -69,7 +69,7 @@ export default class cateAdmin extends React.Component {
         firebase.database().ref('categories/' + newCateName + '/' + newSubCateName).set(cateObject).then(() => {
             console.log('INSERTED a new category!');
         }).catch(error => {
-            console.log('cateAdmin.js _handleSubmit: error = ' + error);
+            console.log('cateAdmin.js _editCustomerDetail: error = ' + error);
         });
     };
 

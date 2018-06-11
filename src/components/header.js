@@ -4,11 +4,14 @@ import {
     Nav,
     NavItem,
     NavLink,
+    Button,
 } from 'reactstrap';
 
 import * as routes from '../constants/routes';
 import AuthUserContext from './AuthUserContext';
 import SignOutButton from './signoutButton';
+import ShoppingCart from '@material-ui/icons/ShoppingCart';
+
 
 const header = () =>
     <AuthUserContext.Consumer>
@@ -44,6 +47,9 @@ const Header_en_onAuth = () =>
         </NavItem>
         <NavItem>
             <NavLink href={routes.ADMIN_HOME}>Admin</NavLink>
+        </NavItem>
+        <NavItem>
+            <NavLink href={routes.SHOPPING_CART}><Button color="primary"><ShoppingCart/></Button></NavLink>
         </NavItem>
         <NavItem>
             <SignOutButton/>

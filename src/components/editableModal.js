@@ -49,7 +49,7 @@ export default class editableModal extends Component {
         firebase.database().ref('user/' + uid).update(newUser).then(() => {
             console.log('UPDATED a user!');
         }).catch(error => {
-            console.log('profile.js _handleSubmit: error = ' + error);
+            console.log('profile.js _editCustomerDetail: error = ' + error);
         });
     };
 

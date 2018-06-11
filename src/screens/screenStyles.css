@@ -7,3 +7,19 @@
 .subCateListItem {
     color: red;
 }
+
+.progressBarDone {
+    border: white;
+    width: 100%;
+    height: 40px;
+}
+
+.progressBarUndone {
+    border: white;
+    width: 100%;
+    background-color: lightgray;
+    text-align: center;
+    justify-content: center;
+    height: 100%;
+    opacity: 0;
+}

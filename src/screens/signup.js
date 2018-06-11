@@ -71,7 +71,7 @@ export default class signup extends React.Component {
         firebase.database().ref('users/' + uid).set(user).then(() => {
             console.log('INSERTED a new user!');
         }).catch(error => {
-            console.log('signup.js _handleSubmit: error = ' + error);
+            console.log('signup.js _editCustomerDetail: error = ' + error);
         });
     };
 

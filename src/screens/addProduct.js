@@ -18,6 +18,7 @@ export default class addProduct extends React.Component {
             pimage: null,
             pdes: null,
             pstore: null,
+            pprice: null
         };
 
         this._loadBrand = this._loadBrand.bind(this);
@@ -133,8 +134,8 @@ export default class addProduct extends React.Component {
 
     _handleSubmit = () => {
 
-        if (this.state.pname === null) {
-            alert("Product name cannot be empty!");
+        if (this.state.pname === null || this.state.pprice === null) {
+            alert("Product name and price cannot be empty!");
         } else {
             let pid = this._generateUUID();
             this.setState({
@@ -150,6 +151,7 @@ export default class addProduct extends React.Component {
                 pimage: this.state.pimage,
                 pdes: this.state.pdes === null ? "No Description" : this.state.pdes,
                 pstore: this.state.pstore === null ? 0 : this.state.pstore,
+                pprice: this.state.pprice === null ? 0 : this.state.pprice,
             };
 
             firebase.database().ref('products/' + pid).set(product).then(() => {
@@ -232,6 +234,12 @@ export default class addProduct extends React.Component {
                                 <FormGroup>
                                     <Label for="pstore">Store</Label>
                                     <Input type="number" name="pstore" id="pstore" placeholder="enter product store"
+                                           onChange={this._handleChange}/>
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label for="pprice">Price</Label>
+                                    <Input type="number" name="pprice" id="pprice" placeholder="enter product price"
                                            onChange={this._handleChange}/>
                                 </FormGroup>
 

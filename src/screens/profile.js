@@ -28,9 +28,12 @@ class profile extends Component {
             modalEditInfo: false,
             modalAddNewAdd: false,
             modalEditAdd: false,
+            modalConfirm: false,
             indexOfAddToEdit: null,
+            indexOfAddToDelete: null,
             toRenderTable: false,
             toRenderAddresses: false,
+            toRenderOrders: false,
             currentUID: null,
             email: null,
             fname: null,
@@ -46,12 +49,13 @@ class profile extends Component {
 
         this._loadUserInfo = this._loadUserInfo.bind(this);
         this._renderInfo = this._renderInfo.bind(this);
-        // this._toggle = this._toggle.bind(this);
         this._handleChange = this._handleChange.bind(this);
-        this._handleSubmit = this._handleSubmit.bind(this);
+        this._editCustomerDetail = this._editCustomerDetail.bind(this);
         this._addNewAddress = this._addNewAddress.bind(this);
         this._editAddress = this._editAddress.bind(this);
         this._handelAddressChange = this._handelAddressChange.bind(this);
+        this._confirm = this._confirm.bind(this);
+
 
     }
 
@@ -123,6 +127,14 @@ class profile extends Component {
 
     };
 
+    _confirm() {
+        this.setState({
+            modalConfirm: !this.state.modalConfirm
+        });
+
+        console.log("modalConfirm = " + this.state.modalConfirm);
+    }
+
     _handleChange = (event) => {
         this.setState({[event.target.name]: event.target.value});
 
@@ -164,7 +176,49 @@ class profile extends Component {
 
     };
 
-    _handleSubmit = () => {
+    _onClickDeleteAddress = (item) => {
+
+        this._confirm();
+
+        this.setState({
+            indexOfAddToDelete: this.state.addresses.indexOf(item)
+        });
+
+
+    };
+
+    _deleteAddress = () => {
+
+        this._confirm();
+
+        let addresses = this.state.addresses;    //creating copy of object
+        let index = this.state.indexOfAddToDelete;
+
+        // console.log("index = " + index);
+
+        // console.log("before" + addresses);
+
+        addresses.splice(index, 1);
+
+        // console.log("after" + addresses);
+
+        let uid = this.state.currentUID;
+
+        firebase.database().ref('users/' + uid + "/addresses").set(addresses).then(() => {
+            // console.log('DELETE one address!');
+
+            this.setState({
+                addresses: addresses
+            });
+
+        }).catch(error => {
+            console.log('profile.js _deleteAddress: error = ' + error);
+        });
+
+
+    };
+
+    _editCustomerDetail = () => {
         this._toggle(1);
         let uid = this.state.currentUID;
 
@@ -182,7 +236,7 @@ class profile extends Component {
         firebase.database().ref('users/' + uid).update(newUser).then(() => {
             console.log('UPDATED a user!');
         }).catch(error => {
-            console.log('profile.js _handleSubmit: error = ' + error);
+            console.log('profile.js _editCustomerDetail: error = ' + error);
         });
     };
 
@@ -193,13 +247,13 @@ class profile extends Component {
                 <tr key={index}>
                     <td>{item.key}</td>
                     <td>{item.value}{"       "}
-                        {item.key === "Email" ? null : <Button style={{float: "right"}} size={"sm"} color={"primary"} onClick={this._toggle.bind(this, 1)}>edit</Button>}
+                        {item.key === "Email" ? null : <Button style={{float: "right"}} size={"sm"} color={"primary"} onClick={this._toggle.bind(this, 1)}>Edit</Button>}
                     </td>
 
                     <Modal isOpen={this.state.modalEditInfo} toggle={this._toggle.bind(this, 1)} className={this.props.className} backdrop={false}>
                         <ModalHeader toggle={this._toggle.bind(this, 1)}>Edit Profile</ModalHeader>
                         <ModalBody>
-                            <Form onSubmit={this._handleSubmit}>
+                            <Form onSubmit={this._editCustomerDetail}>
                                 <FormGroup disabled>
                                     <Label for="email">Email</Label>
                                     <Input type="email" name="email" id="email" disabled
@@ -228,7 +282,7 @@ class profile extends Component {
                                     />
                                 </FormGroup>
 
-                                <Button color="primary" onClick={this._handleSubmit}>Save</Button>
+                                <Button color="primary" onClick={this._editCustomerDetail}>Save</Button>
                                 <span>&nbsp;&nbsp;</span>
                                 <Button color="secondary" onClick={this._toggle.bind(this, 1)}>Cancel</Button>
                             </Form>
@@ -239,7 +293,7 @@ class profile extends Component {
         )
     };
 
-    _renderAdd = () => {
+    _renderAddresses = () => {
 
         return (
             this.state.addresses.map((item, index) => (
@@ -250,8 +304,12 @@ class profile extends Component {
                     <td>{item.mobile}</td>
                     <td>{item.address}
                         <Button style={{float: "right"}} size={"sm"} color={"primary"}
-                                onClick={this._onClickEditAddress.bind(this, item)}>edit</Button>
+                                onClick={this._onClickEditAddress.bind(this, item)}>Edit</Button>
+                        <span style={{float: "right"}}>&nbsp;&nbsp;</span>
+                        <Button style={{float: "right"}} size={"sm"} color={"danger"}
+                                onClick={this._onClickDeleteAddress.bind(this, item)}>Delete</Button>
                     </td>
+
                     <Modal isOpen={this.state.modalEditAdd} toggle={this._toggle.bind(this, 3)} className={this.props.className} backdrop={false}>
                         <ModalHeader toggle={this._toggle.bind(this, 3)}>Edit Address</ModalHeader>
                         <ModalBody>
@@ -291,6 +349,16 @@ class profile extends Component {
                             </Form>
                         </ModalBody>
                     </Modal>
+
+
+                    <Modal isOpen={this.state.modalConfirm} toggle={this._confirm} className={this.props.className} backdrop={false}>
+                        <ModalHeader toggle={this._confirm}>Delete Item?</ModalHeader>
+                        <ModalBody>
+                            <Button color="danger" onClick={this._deleteAddress.bind(this)}>Delete</Button>
+                            <span>&nbsp;&nbsp;</span>
+                            <Button color="secondary" onClick={this._confirm}>Cancel</Button>
+                        </ModalBody>
+                    </Modal>
                 </tr>
             ))
         )
@@ -303,22 +371,33 @@ class profile extends Component {
 
         let uid = this.state.currentUID;
         let address = this.state.newAddress;
-        let addressToAdd = {
-            fname: address.fname_add,
-            lname: address.lname_add,
-            mobile: address.mobile_add,
-            address: address.address_add
-        };
+        console.log(address.fname_add,address.lname_add,address.mobile_add,address.address_add);
 
-        let currentAddresses = this.state.addresses;
-        currentAddresses.push(addressToAdd);
+        if (address.fname_add && address.lname_add && address.mobile_add && address.address_add) {
+            let addressToAdd = {
+                fname: address.fname_add,
+                lname: address.lname_add,
+                mobile: address.mobile_add,
+                address: address.address_add
+            };
 
-        firebase.database().ref('users/' + uid + "/addresses").update(currentAddresses).then(() => {
-            console.log('UPDATED addresses!');
-        }).catch(error => {
-            console.log('profile.js _addNewAddress: error = ' + error);
-        });
+            let currentAddresses = this.state.addresses;
+            currentAddresses.push(addressToAdd);
 
+            firebase.database().ref('users/' + uid + "/addresses").update(currentAddresses).then(() => {
+                // console.log('UPDATED addresses!');
+                this.setState({
+                    newAddress: {}
+                });
+            }).catch(error => {
+                console.log('profile.js _addNewAddress: error = ' + error);
+            });
+
+        } else {
+
+            alert("Address information cannot be empty!");
+
+        }
 
     };
 
@@ -359,6 +438,7 @@ class profile extends Component {
 
         return (
             <Container>
+                {/*customer detail*/}
                 <Row>
                     <h5>Customer Detail</h5>
                 </Row>
@@ -372,6 +452,9 @@ class profile extends Component {
                         <hr/>
                     </Col>
                 </Row>
+                <hr/>
+
+                {/*address*/}
                 <Row>
                     <h5>Address</h5>
                     <span>&nbsp;&nbsp;</span>
@@ -429,12 +512,40 @@ class profile extends Component {
                             </tr>
                             </thead>
                             <tbody>
-                            {this.state.toRenderAddresses ? this._renderAdd() : null}
+                            {this.state.toRenderAddresses ? this._renderAddresses() : null}
                             </tbody>
                         </Table>
                         <hr/>
                     </Col>
                 </Row>
+                <hr/>
+
+                {/*orders*/}
+                <Row>
+                    <h5>Orders</h5>
+                    <span>&nbsp;&nbsp;</span>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        <Table>
+                            <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Order Time</th>
+                                <th>Status</th>
+                                <th>Subtotal</th>
+                                <th>Detail</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {null}
+                            </tbody>
+                        </Table>
+                        <hr/>
+                    </Col>
+                </Row>
+                <hr/>
+
             </Container>
         );
     }

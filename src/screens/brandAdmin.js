@@ -9,17 +9,21 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 export default class brandAdmin extends React.Component {
 
     constructor(props) {
-        super();
+        super(props);
         this.state = {
             brands: [],
             modal: false,
             newBrand: "",
+            modalConfirm: false,
+            indexOfBrandToDelete: null,
         };
 
         this._toggle = this._toggle.bind(this);
+        this._confirm = this._confirm.bind(this);
         this._handleChange = this._handleChange.bind(this);
         this._handleSubmit = this._handleSubmit.bind(this);
         this._loadBrands = this._loadBrands.bind(this);
+        this._handleDelete = this._handleDelete.bind(this);
     }
 
     _toggle() {
@@ -67,28 +71,55 @@ export default class brandAdmin extends React.Component {
         firebase.database().ref('brands/' + newBrandName).set(brandObjet).then(() => {
             console.log('INSERTED a new brand!');
         }).catch(error => {
-            console.log('abrandAdmin.js _handleSubmit: error = ' + error);
+            console.log('abrandAdmin.js _editCustomerDetail: error = ' + error);
         });
     };
 
-    _handleDelete = (item) => {
+    _handleDelete = () => {
 
-        console.log("start to deleting " + item);
+        this._confirm();
 
-        firebase.database().ref('brands/' + item).remove().then(() => {
-            console.log('DELETED! brand name = ' + item);
+        let brands = this.state.brands;    //creating copy of object
+        let index = this.state.indexOfBrandToDelete;
+        console.log("brands = " + brands, "index = " + index);
+
+        let brand = brands[index];
+
+        console.log("start to deleting " + brand.brandName);
+
+        firebase.database().ref('brands/' + brand.brandName).remove().then(() => {
+            console.log('DELETED! brand name = ' + brand.brandName);
         }).catch(error => {
             console.log(error);
         });
 
 
-        let brandList = this.state.brands;
-        const index = brandList.indexOf(item);
-        brandList.splice(index, 1);
-        this.setState({
-            brands: brandList
-        });
+        // let brandList = this.state.brands;
+        // const index = brandList.indexOf(item);
+        // brandList.splice(index, 1);
+        // this.setState({
+        //     brands: brandList
+        // });
     };
+
+    _onClickDeleteBrand = (brand) => {
+
+        this._confirm();
+
+        this.setState({
+            indexOfBrandToDelete: this.state.brands.indexOf(brand)
+        });
+
+
+    };
+
+    _confirm() {
+        this.setState({
+            modalConfirm: !this.state.modalConfirm
+        });
+
+        console.log("modalConfirm = " + this.state.modalConfirm);
+    }
 
     componentWillMount() {
         console.log("brandAdmin.hs componnent will mount!");
@@ -98,6 +129,7 @@ export default class brandAdmin extends React.Component {
     render() {
         return (
             <div>
+
                 <Row>
                     <h3>Current Brand List has {this.state.brands.length} brands</h3>
                     <span>&nbsp;&nbsp;</span>
@@ -117,6 +149,8 @@ export default class brandAdmin extends React.Component {
                                 <Button color="primary" onClick={this._handleSubmit}>Submit</Button>
                                 <span>&nbsp;&nbsp;</span>
                                 <Button color="secondary" onClick={this._toggle}>Cancel</Button>
+
+
                             </Form>
                         </ModalBody>
                     </Modal>
@@ -138,7 +172,16 @@ export default class brandAdmin extends React.Component {
                             <td>{item.brandName}</td>
                             <td>{item.brandCate.join(" | ")}</td>
                             <td><Button color={"info"}>Edit</Button></td>
-                            <td><Button color={"danger"} onClick={this._handleDelete.bind(this, item)}>Delete</Button></td>
+                            <td><Button color={"danger"} onClick={this._onClickDeleteBrand.bind(this, item)}>Delete</Button></td>
+
+                            <Modal isOpen={this.state.modalConfirm} toggle={this._confirm} className={this.props.className} backdrop={false} >
+                                <ModalHeader toggle={this._confirm}>Delete Item?</ModalHeader>
+                                <ModalBody>
+                                    <Button color="danger" onClick={this._handleDelete}>Delete</Button>
+                                    <span>&nbsp;&nbsp;</span>
+                                    <Button color="secondary" onClick={this._confirm}>Cancel</Button>
+                                </ModalBody>
+                            </Modal>
                         </tr>
                     ))}
 

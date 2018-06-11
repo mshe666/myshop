@@ -30,13 +30,19 @@ class wellness extends Component {
             subCateFilter: [],
             brandFilter: [],
             searchBrand: null,
+            currentUID: null,
+            cart: null,
 
         };
+
+        this.hasMounted = false;
+
         this._renderProducts = this._renderProducts.bind(this);
         this._renderBrands = this._renderBrands.bind(this);
         this._renderSubcategories = this._renderSubcategories.bind(this);
         this._loadCategories = this._loadCategories.bind(this);
         this._loadBrands = this._loadBrands.bind(this);
+        this._loadUserInfo = this._loadUserInfo.bind(this);
         this._toggleCate = this._toggleCate.bind(this);
         this._toggleBrand = this._toggleBrand.bind(this);
         this._toggleBrand = this._toggleBrand.bind(this);
@@ -55,8 +61,9 @@ class wellness extends Component {
                     let pimage = item.child('pimage').val();
                     let pdes = item.child('pdes').val();
                     let pstore = item.child('pstore').val();
+                    let pprice = item.child('pprice').val();
 
-                    if (item != null && pid != null && pname != null && pcate === "wellness") {
+                    if (item != null && pid != null && pname != null && pprice != null && pcate === "wellness") {
                         productList.push({
                             pid: pid,
                             pname: pname,
@@ -65,7 +72,8 @@ class wellness extends Component {
                             psubcate: psubcate === null ? "Unknown" : psubcate,
                             pimage: pimage === null ? "https://placeholdit.imgix.net/~text?txtsize=33&txt=318%C3%97180&w=318&h=180" : pimage,
                             pdes: pdes === null ? "No description" : pdes,
-                            pstore: pstore === null ? 0 : pstore
+                            pstore: pstore === null ? 0 : pstore,
+                            pprice: pprice === null ? 0 : pprice
                         });
                         // console.log("pushing " + pname + " to products");
                     }
@@ -124,6 +132,29 @@ class wellness extends Component {
                 console.log("loading brands error! " + error);
             })
         );
+    };
+
+    _loadUserInfo = () => {
+
+        this.hasMounted = true;
+
+        let user = firebase.auth().currentUser;
+        if (user != null) {
+            let currentUID = user.uid;
+            firebase.database().ref('users/' + currentUID).on('value', (data) => {
+
+                let cart = data.child('cart').val() === null ? [] : data.child('cart').val();
+
+                if (this.hasMounted) {
+                    this.setState({
+                        currentUID: currentUID,
+                        cart: cart,
+                    })
+                }
+            });
+        }
+
+
     };
 
     _handelSubCateFilter = (subCate, event) => {
@@ -201,7 +232,7 @@ class wellness extends Component {
 
         return (
             productsToLoad.map((item, index) => (
-                <Item key={index} item={item}/>
+                <Item key={index} item={item} addToCart={this._addToCart} uid={this.state.currentUID} cart={this.state.cart}/>
             ))
         )
 
@@ -276,10 +307,47 @@ class wellness extends Component {
         }
     };
 
+    _addToCart = (uid, cart, itemID, item) => {
+
+        let isNew = true;
+        cart.forEach((product) => {
+            if (product.pid === itemID) {
+                product.count += 1;
+                isNew = false;
+            }
+        });
+
+        if (isNew) {
+            cart.push({pid: itemID, count: 1, detail: item})
+        }
+
+        this.hasMounted = true;
+
+        firebase.database().ref('users/' + uid + "/cart").set(cart).then(() => {
+            // console.log('UPDATED one address!');
+        }).catch(error => {
+            console.log('wellness.js addToCart: error = ' + error);
+        });
+
+        if (this.hasMounted) {
+            this.setState({
+                cart: cart
+            });
+        }
+    };
+
     componentWillMount() {
         this._loadProducts();
         this._loadCategories();
         this._loadBrands();
+    }
+
+    componentDidMount() {
+        this._loadUserInfo();
+    }
+
+    componentWillUnmount() {
+        this.hasMounted = false;
     }
 
     render() {

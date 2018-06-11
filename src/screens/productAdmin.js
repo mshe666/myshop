@@ -36,6 +36,7 @@ export default class productAdmin extends React.Component {
                         pimage: item.child('pimage').val(),
                         pdes: item.child('pdes').val(),
                         pstore: item.child('pstore').val(),
+                        pprice: item.child('pprice').val(),
                     };
 
                     productList.push(product);
@@ -94,6 +95,7 @@ export default class productAdmin extends React.Component {
                         <th>Category</th>
                         <th>Subcategory</th>
                         <th>Store</th>
+                        <th>Price(NZD)</th>
                         <th>Image</th>
                         <th>Description</th>
                         <th>Edit</th>
@@ -109,6 +111,7 @@ export default class productAdmin extends React.Component {
                             <td>{item.pcate}</td>
                             <td>{item.psubcate}</td>
                             <td>{item.pstore}</td>
+                            <td>{item.pprice}</td>
                             <td>{item.pimage}</td>
                             <td>{item.pdes}</td>
                             <td><Button color={"info"}>Edit</Button></td>

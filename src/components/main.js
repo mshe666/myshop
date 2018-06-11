@@ -7,6 +7,7 @@ import Beauty from '../screens/beauty';
 import Makeup from '../screens/makeup';
 import Category from '../screens/category';
 import Profile from '../screens/profile';
+import ShoppingCart from '../screens/shoppingCart';
 import Signup from '../screens/signup';
 import Signin from '../screens/signin';
 import Admin from '../screens/admin';
@@ -78,6 +79,7 @@ class main extends Component {
                 <Route path={routes.BEAUTY} component={() => <Beauty/>}/>
                 <Route path={routes.CATEGORY} component={() => <Category/>}/>
                 <Route path={routes.PROFILE} component={() => <Profile/>}/>
+                <Route path={routes.SHOPPING_CART} component={() => <ShoppingCart/>}/>
                 <Route path={routes.SIGN_UP} component={() => <Signup/>}/>
                 <Route path={routes.SIGN_IN} component={() => <Signin/>}/>
                 <Route path={routes.ADMIN} component={() => <Admin/>}/>
