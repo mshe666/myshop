@@ -1,7 +1,7 @@
 import React from 'react';
 
 import firebase from '../firebase/firebase';
-import {Button} from 'reactstrap';
+import {Button} from 'react-bootstrap';
 
 
 export default class SignOutButton extends React.Component {
@@ -20,9 +20,9 @@ export default class SignOutButton extends React.Component {
 
     render() {
         return (
-            <Button color={"primary"} onClick={this._signOut}>
+            <span onClick={this._signOut}>
                 Sign Out
-            </Button>
+            </span>
         );
     }
 }

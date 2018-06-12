@@ -1,19 +1,18 @@
 import React, {Component} from 'react';
 import Item from '../components/item';
-import {Container, Row, Col, Button} from 'reactstrap';
+import {Container, Row, Col} from 'reactstrap';
 import firebase from '../firebase/firebase';
 import './screenStyles.css';
 import {
     InputGroup,
-    InputGroupAddon,
-    Input,
+    FormControl,
     Form,
     FormGroup,
-    Label,
-} from 'reactstrap';
+} from 'react-bootstrap';
 import {ListGroup, ListGroupItem} from 'reactstrap';
-import {Breadcrumb, BreadcrumbItem} from 'reactstrap';
+import {Breadcrumb, BreadcrumbItem, Button} from 'react-bootstrap';
 import {Collapse, CardBody, Card, Badge} from 'reactstrap';
+
 import SearchIcon from '@material-ui/icons/Search';
 
 
@@ -369,7 +368,7 @@ class wellness extends Component {
                     {/*search or filter brand*/}
                     <Col xs={12} md={8} lg={3}>
 
-                        <Button color="info" onClick={this._toggleCate} style={{width: '100%', marginBottom: '1rem'}}>
+                        <Button bsStyle={"info"} onClick={this._toggleCate} style={{width: '100%', marginBottom: '1rem'}}>
                             <span style={{float: 'left'}}>Wellness</span>
                             <span style={{float: 'right'}}>{this.state.cateCollapse ? "less" : "more"}</span>
                         </Button>
@@ -381,22 +380,22 @@ class wellness extends Component {
                             </ListGroup>
                         </Collapse>
 
-                        <br/>
 
-                        <Button color="info" onClick={this._toggleBrand} style={{width: '100%', marginBottom: '1rem'}}>
+                        <Button bsStyle={"info"} onClick={this._toggleBrand} style={{width: '100%', marginBottom: '1rem'}}>
                             <span style={{float: 'left'}}>Brands</span>
                             <span style={{float: 'right'}}>{this.state.brandCollapse ? "less" : "more"}</span>
                         </Button>
 
                         <Collapse isOpen={this.state.brandCollapse}>
+                            <FormGroup>
+                                <InputGroup>
+                                    <FormControl type="text" name={"searchBrand"} placeholder={"Search Brand"} onChange={this._handleChange}/>
+                                    <InputGroup.Addon>
+                                        <SearchIcon style={{height:"10%"}}/>
+                                    </InputGroup.Addon>
+                                </InputGroup>
+                            </FormGroup>
 
-                            <InputGroup>
-                                <Input type={"text"} name={"searchBrand"} placeholder="Search Brand" onChange={this._handleChange}/>
-                                <InputGroupAddon addonType="append"><Button
-                                    color="secondary"><SearchIcon/></Button></InputGroupAddon>
-                            </InputGroup>
-
-                            <br/>
                             <Form>
                                 <ListGroup>
                                     {this._renderBrands()}

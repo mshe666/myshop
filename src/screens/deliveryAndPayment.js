@@ -1,15 +1,27 @@
 import React from 'react';
 import firebase from "../firebase/firebase";
 import {Table} from 'reactstrap';
-import {Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
-import {Container, Row, Col} from 'reactstrap';
-import {ProgressBar, Button, Form, FormGroup, Label, FormControl, Radio, ControlLabel} from 'react-bootstrap';
+import {ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
+import {Grid, Row, Col} from 'react-bootstrap';
+import {
+    ProgressBar,
+    Button,
+    Form,
+    FormGroup,
+    Label,
+    FormControl,
+    Radio,
+    ControlLabel,
+    Well,
+    Panel,
+    Modal,
+    Alert,
+    Image,
+} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 import * as routes from "../constants/routes";
 import item from "../components/item";
-import {
-    Card, CardText, CardBody, CardHeader,
-} from 'reactstrap';
+
 
 export default class deliveryAndPayment extends React.Component {
 
@@ -18,8 +30,10 @@ export default class deliveryAndPayment extends React.Component {
 
         this.state = {
             uid: null,
+            orders: null,
             addresses: null,
             toRenderAddresses: false,
+            subtotal: null,
             indexOfAddToEdit: null,
             modalEditAdd: false,
             newAddress: {},
@@ -32,6 +46,7 @@ export default class deliveryAndPayment extends React.Component {
         this._handelAddressChange = this._handelAddressChange.bind(this);
         this._addNewAddress = this._addNewAddress.bind(this);
         this._editAddress = this._editAddress.bind(this);
+        this._loadItems = this._loadItems.bind(this);
     }
 
     _loadUserInfo = () => {
@@ -40,13 +55,17 @@ export default class deliveryAndPayment extends React.Component {
             let currentUID = user.uid;
             firebase.database().ref('users/' + currentUID).on('value', (data) => {
                 let addresses = data.child('addresses').val() === null ? [] : data.child('addresses').val();
+                let orders = data.child('orders').val() === null ? [] : data.child('orders').val();
 
                 this.setState({
                     uid: currentUID,
+                    orders: orders,
                     addresses: addresses,
                     toRenderAddresses: true,
 
                 });
+
+                console.log("subtotal = " + subtotal);
 
             });
         }
@@ -111,8 +130,8 @@ export default class deliveryAndPayment extends React.Component {
 
     _handleChange = (event) => {
         this.setState({[event.target.name]: event.target.value});
-        console.log(event.target.name, event.target.value, event.target.checked);
-        console.log(this.state.addressToDisplay)
+        console.log(event.target.name, event.target.value);
+
 
     };
 
@@ -121,6 +140,14 @@ export default class deliveryAndPayment extends React.Component {
             addressToDisplay: item,
             addressFrom: null,
         });
+    };
+
+    _handleSelectDeliveryMethod = (method) => {
+        this.setState({
+            delivery: method,
+        });
+
+        console.log("delivery = " + this.state.delivery);
     };
 
     _addNewAddress = () => {
@@ -174,26 +201,40 @@ export default class deliveryAndPayment extends React.Component {
 
         return (
             this.state.addresses.map((item, index) => (
-                <Col xs={6}>
-                    <Card>
-                        <CardHeader tag="h8">{item.fname}<span>&nbsp;</span>{item.lname}
-                            <Button style={{float: "right"}} size={"sm"} color={"primary"}
-                                    onClick={this._handelSelectAddress.bind(this, item)}>Select</Button>
-                            <span style={{float: "right"}}>&nbsp;&nbsp;</span>
+                <Col xs={6} key={index}>
 
-                            <Button style={{float: "right"}} size={"sm"} color={"primary"}
-                                    onClick={this._onClickEditAddress.bind(this, item)}>Edit</Button>
-                            <span style={{float: "right"}}>&nbsp;&nbsp;</span>
-                        </CardHeader>
-                        <CardBody className={"text-left"}>
-                            <CardText>{"Mobile:  "}{item.mobile}</CardText>
-                            <CardText>{"Address:  "}{item.address}</CardText>
+                    <Panel bsStyle="info">
+                        <Panel.Heading>
+                            <Panel.Title className={"clearfix"}>
+                                <span>
+                                    {item.fname}
+                                    <span>&nbsp;</span>
+                                    {item.lname}
+                                </span>
+                                <span className={"pull-right"}>
+                                    <Button size={"sm"} color={"primary"}
+                                            onClick={this._handelSelectAddress.bind(this, item)}>Select</Button>
+
+                                    <span>&nbsp;&nbsp;</span>
+
+                                    <Button size={"sm"} color={"primary"}
+                                            onClick={this._onClickEditAddress.bind(this, item)}>Edit</Button>
+                                    <span>&nbsp;&nbsp;</span>
+                                </span>
 
 
-                            <Modal isOpen={this.state.modalEditAdd} toggle={this._toggle.bind(this, 3)}
-                                   className={this.props.className} backdrop={false}>
-                                <ModalHeader toggle={this._toggle.bind(this, 3)}>Edit Address</ModalHeader>
-                                <ModalBody>
+                            </Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Body>
+                            <p>{"Mobile:  "}{item.mobile}</p>
+                            <p>{"Address:  "}{item.address}</p>
+
+
+                            <Modal show={this.state.modalEditAdd} onHide={this._toggle.bind(this, 3)} backdrop={false}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Edit Address</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
                                     <Form>
                                         <FormGroup>
                                             <ControlLabel>First Name</ControlLabel>
@@ -228,11 +269,10 @@ export default class deliveryAndPayment extends React.Component {
                                         <span>&nbsp;&nbsp;</span>
                                         <Button color="secondary" onClick={this._toggle.bind(this, 3)}>Cancel</Button>
                                     </Form>
-                                </ModalBody>
+                                </Modal.Body>
                             </Modal>
-                        </CardBody>
-
-                    </Card>
+                        </Panel.Body>
+                    </Panel>
                 </Col>
 
 
@@ -241,36 +281,96 @@ export default class deliveryAndPayment extends React.Component {
 
     };
 
+    _loadItems = () => {
+        let user = firebase.auth().currentUser;
+        if (user != null) {
+            let currentUID = user.uid;
+
+            firebase.database().ref('users/' + currentUID).on('value', (data) => {
+                let cart = data.child('cart').val() === null ? [] : data.child('cart').val();
+                let subtotal = 0;
+                cart.forEach((product) => {
+                    subtotal += product.detail.pprice * product.count;
+                });
+
+                this.setState({
+                    cart: cart,
+                    toRenderCart: true,
+                    subtotal: subtotal,
+                });
+
+            });
+        }
+
+    };
+
+    _createOrder = () => {
+        let orders = this.state.orders;
+
+        let uid = this.state.uid;
+        let products = this.state.cart;
+        let subtotal = this.state.subtotal;
+        let deliveryAddress = this.state.addressToDisplay;
+        let deliveryMethod = this.state.delivery;
+        let paymentOption = this.state.paymentOption;
+
+        if (uid && products && subtotal && deliveryAddress && deliveryMethod && paymentOption) {
+            let order = {
+                uid: uid,
+                products: products,
+                subtotal: subtotal,
+                deliveryAddress: deliveryAddress,
+                deliveryMethod: deliveryMethod,
+                paymentOption: paymentOption,
+                orderTime: new Date(),
+                paymentTime: null,
+                status: 0,
+            };
+
+            console.log("order = " + order);
+
+            orders.push(order);
+
+            firebase.database().ref('users/' + uid + "/orders").set(orders).then(() => {
+                // console.log('UPDATED one address!');
+            }).catch(error => {
+                console.log('deliveryAndPayment.js _createOrder: error = ' + error);
+            });
+        }
+
+    };
+
 
     componentDidMount() {
         this._loadUserInfo();
+        this._loadItems();
     }
 
 
     render() {
         return (
-            <Container>
+            <Grid>
+                {/*progress bar*/}
                 <Row>
                     <Col xs={12}>
-                        <ProgressBar style={{height: "40px", fontSize: "15px"}}>
-                            <ProgressBar bsStyle="success" now={25} key={1} label={<Link to={routes.SHOPPING_CART}
-                                                                                         style={{
-                                                                                             textDecoration: "none",
-                                                                                             color: "white"
-                                                                                         }}>1. Your Bucket</Link>}/>
-                            <ProgressBar bsStyle="success" now={25} key={2} label={"2. Delivery & Payment"}/>
-                            <ProgressBar now={25} key={3} label={"3. Review & Confirm"}/>
-                            <ProgressBar now={25} key={4} label={"4. All Done!"}/>
-                        </ProgressBar>
+                        <Button bsStyle={"success"} style={{width: "25%"}}>
+                            <Link to={routes.SHOPPING_CART} style={{textDecoration: "none", color: "white"}}>1. Your
+                                Bucket</Link>
+                        </Button>
+                        <Button bsStyle={"success"} style={{width: "25%"}}>2. Delivery & Payment</Button>
+                        <Button style={{width: "25%"}}>3. Review & Confirm</Button>
+                        <Button style={{width: "25%"}}>4. All Done!</Button>
                     </Col>
                 </Row>
                 <br/>
+                {/*shipping detail*/}
                 <Row style={{backgroundColor: "lightgrey"}}>
                     <Col xs={12}>
-                        <h5>Shipping Detail</h5>
+                        <h5>1. Shipping Detail</h5>
                     </Col>
                 </Row>
                 <br/>
+                {/*shipping address*/}
                 <Row style={{border: "1px solid lightgrey"}}>
                     <Col xs={3}>
                         <Radio name="addressFrom" value={"fromCurrentAddresses"}
@@ -284,12 +384,13 @@ export default class deliveryAndPayment extends React.Component {
                             {"Use New"}
                         </Radio>
 
-                        <div style={{border: "1px solid lightgrey"}}>
-                            <p>First Name: {this.state.addressToDisplay.fname}</p>
-                            <p>Lat Name: {this.state.addressToDisplay.lname}</p>
-                            <p>Mobile: {this.state.addressToDisplay.mobile}</p>
-                            <p>Address: {this.state.addressToDisplay.address}</p>
+                        <div style={{border: "1px solid lightgrey", padding: "10px"}}>
+                            <p><b>First Name: </b>{this.state.addressToDisplay.fname}</p>
+                            <p><b>Last Name: </b>{this.state.addressToDisplay.lname}</p>
+                            <p><b>Mobile: </b>{this.state.addressToDisplay.mobile}</p>
+                            <p><b>Address: </b>{this.state.addressToDisplay.address}</p>
                         </div>
+                        <br/>
 
                     </Col>
                     <Col xs={9}>
@@ -339,27 +440,138 @@ export default class deliveryAndPayment extends React.Component {
 
                     </Col>
                 </Row>
-
-
                 <hr/>
-                <Row>
+
+                {/*delivery method*/}
+                <Row style={{backgroundColor: "lightgrey"}}>
                     <Col xs={12}>
-                        <h5>Select Delivery Method</h5>
+                        <h5>2. Select Delivery Method</h5>
+                    </Col>
+                </Row>
+                <br/>
+                <Row style={{border: "1px solid lightgrey"}}>
+                    <Col xs={12}>
+                        <br/>
+
+                        {this.state.subtotal >= 100 ?
+                            <Alert bsStyle={"success"}>Your order qualifies for FREE premium shipping</Alert>
+                            : this.state.subtotal >= 50 ?
+                                <Alert bsStyle={"success"}>Your oder qualifies for FREE standard shipping</Alert>
+                                : null}
+
+                        <div>
+
+                            {this.state.subtotal >= 100 ?
+                                <Well>
+                                    <div style={{display: "inline"}} className={"clearfix"}>
+                                        <div style={{display: "inline-block"}}>
+                                            <p>Premium Shipping</p>
+                                            <p>5 - 7 business days. Shipping time may be delayed due to weather and
+                                                other
+                                                unpredicted reasons.</p>
+                                        </div>
+                                        <div style={{display: "inline-block", height: "auto"}} className={"pull-right"}>
+                                            <b>FREE</b>
+                                        </div>
+                                    </div>
+
+                                </Well>
+                                : this.state.subtotal >= 50 ?
+                                    <Well>
+                                        <div style={{display: "inline"}} className={"clearfix"}>
+                                            <div style={{display: "inline-block"}}>
+                                                <p>Standard Shipping</p>
+                                                <p>10 - 15 business days. Shipping time may be delayed due to weather
+                                                    and other
+                                                    unpredicted reasons.</p>
+                                            </div>
+                                            <div style={{display: "inline-block", height: "auto"}}
+                                                 className={"pull-right"}>
+                                                <b>FREE</b>
+                                            </div>
+                                        </div>
+
+                                    </Well>
+                                    : <div>
+                                        <Well onClick={this._handleSelectDeliveryMethod.bind(this, "standard")}
+                                              style={{cursor: "pointer"}}
+                                              bsStyle={this.state.delivery === "standard" ? "success" : null}>
+                                            <div style={{display: "inline"}} className={"clearfix"}>
+                                                <div style={{display: "inline-block"}}>
+                                                    <p>Standard Shipping</p>
+                                                    <p>10 - 15 business days. Shipping time may be delayed due to
+                                                        weather and other
+                                                        unpredicted reasons.</p>
+                                                </div>
+                                                <div style={{display: "inline-block", height: "auto"}}
+                                                     className={"pull-right"}>
+                                                    <b>NZD $5.00</b>
+                                                </div>
+                                            </div>
+
+                                        </Well>
+                                        <Well onClick={this._handleSelectDeliveryMethod.bind(this, "premium")}
+                                              style={{cursor: "pointer"}}>
+                                            <div style={{display: "inline"}} className={"clearfix"}>
+                                                <div style={{display: "inline-block"}}>
+                                                    <p>Premium Shipping</p>
+                                                    <p>5 - 7 business days. Shipping time may be delayed due to weather
+                                                        and other
+                                                        unpredicted reasons.</p>
+                                                </div>
+                                                <div style={{display: "inline-block", height: "auto"}}
+                                                     className={"pull-right"}>
+                                                    <b>NZD $12.00</b>
+                                                </div>
+                                            </div>
+
+                                        </Well>
+                                    </div>
+                            }
+
+                        </div>
                     </Col>
                 </Row>
 
                 <hr/>
-                <Row>
+                <Row style={{backgroundColor: "lightgrey"}}>
                     <Col xs={12}>
-                        <h5>Choose Your Payment Option</h5>
+                        <h5>3. Choose Your Payment Option</h5>
                     </Col>
+                </Row>
+                <br/>
+                <Row>
+                    <Col xs={4}>
+                        <Radio name="paymentOption" value={"alipay"}
+                               onChange={this._handleChange}>
+                            <span>&nbsp;&nbsp;</span>
+                            <Image src={routes.ALIPAY_LOGO} responsive={true} thumbnail={true} style={{height: "60px", width: "60px"}}/>
+                        </Radio>
+                    </Col>
+                    <Col xs={4}>
+                        <Radio name="paymentOption" value={"wechat"}
+                               onChange={this._handleChange}>
+                            <span>&nbsp;&nbsp;</span>
+                            <Image src={routes.WECHATPAY_LOGO} responsive={true} thumbnail={true} style={{height: "60px", width: "60px"}}/>
+                        </Radio>
+                    </Col>
+
+                    {/*<Col xs={2}/>*/}
+                    {/*<Col xs={4}>*/}
+                        {/*<Image src={routes.ALIPAY_QRCODE} responsive={true} thumbnail={true} />*/}
+                    {/*</Col>*/}
+                    {/*<Col xs={4}>*/}
+                        {/*<Image src={routes.WECHATPAY_QRCODE} responsive={true} thumbnail={true} />*/}
+                    {/*</Col>*/}
+                    {/*<Col xs={2}/>*/}
+
                 </Row>
                 <Row>
                     <Col xs={12}>
                         <Button color={"primary"} className={"float-right"}>Proceed to Payment</Button>
                     </Col>
                 </Row>
-            </Container>
+            </Grid>
         );
     }
 

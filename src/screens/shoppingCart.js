@@ -1,10 +1,8 @@
 import React from 'react';
 import {Form, FormGroup, Label, Input, FormText} from 'reactstrap';
 import firebase from "../firebase/firebase";
-import {Table} from 'reactstrap';
-import {Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 import {Container, Row, Col} from 'reactstrap';
-import { ProgressBar, Button } from 'react-bootstrap';
+import {Table, ProgressBar, Button, Image} from 'react-bootstrap';
 import './screenStyles.css';
 import {Link} from 'react-router-dom';
 import * as routes from "../constants/routes";
@@ -55,7 +53,8 @@ export default class shoppingCart extends React.Component {
                     cart: cart,
                     toRenderCart: true,
                     subtotal: subtotal,
-                })
+                });
+
             });
         }
 
@@ -75,9 +74,9 @@ export default class shoppingCart extends React.Component {
                         <Button size={"sm"} color={"secondary"} onClick={this._decrement.bind(this, product)}>-</Button>
                         <span>&nbsp;&nbsp;</span>{product.count}<span>&nbsp;&nbsp;</span>
                         <Button size={"sm"} color={"secondary"} onClick={this._increment.bind(this, product)}>+</Button>
-                        </td>
+                    </td>
                     <td>{parseFloat(Math.round(product.detail.pprice * product.count * 100) / 100).toFixed(2)}</td>
-                    <td><Button size={"sm"} color={"danger"}>Delete</Button></td>
+                    <td><Button size={"sm"} color={"danger"} onClick={this._onClickDeleteItem.bind(this, product)}>Delete</Button></td>
                 </tr>
 
             ))
@@ -90,7 +89,7 @@ export default class shoppingCart extends React.Component {
         let cart = this.state.cart;
         let index = cart.indexOf(product);
         if (cart[index].count > 1) {
-            cart[index].count --;
+            cart[index].count--;
         } else {
             cart[index].count = 1;
         }
@@ -105,7 +104,7 @@ export default class shoppingCart extends React.Component {
     _increment = (product) => {
         let cart = this.state.cart;
         let index = cart.indexOf(product);
-            cart[index].count ++;
+        cart[index].count++;
 
         this._updateCart();
 
@@ -126,6 +125,28 @@ export default class shoppingCart extends React.Component {
 
     };
 
+    _onClickDeleteItem = (item) => {
+        this.setState({
+            indexOfItemToDelete: this.state.cart.indexOf(item)
+        });
+        let uid = this.state.uid;
+
+        let cart = this.state.cart;    //creating copy of object
+        let index = this.state.indexOfItemToDelete;
+        cart.splice(index, 1);
+
+        firebase.database().ref('users/' + uid + "/cart").set(cart).then(() => {
+            // console.log('UPDATED one address!');
+        }).catch(error => {
+            console.log('shoppingCart.js _onClickDeleteItem: error = ' + error);
+        });
+
+        this.setState({
+            cart: cart
+        });
+    };
+
+
     componentDidMount() {
         this._loadItems();
         this._loadUserInfo();
@@ -137,12 +158,10 @@ export default class shoppingCart extends React.Component {
             <Container>
                 <Row>
                     <Col xs={12}>
-                        <ProgressBar style={{height: "40px", fontSize: "15px"}}>
-                            <ProgressBar bsStyle="success" now={25} key={1} label={"1. Your Bucket"}/>
-                            <ProgressBar bsStyle="primary" now={25} key={2} label={"2. Delivery & Payment"}/>
-                            <ProgressBar bsStyle="primary" now={25} key={3} label={"3. Review & Confirm"}/>
-                            <ProgressBar bsStyle="primary" now={25} key={4} label={"4. All Done!"}/>
-                        </ProgressBar>
+                        <Button bsStyle={"success"} style={{width: "25%"}}>1. Your Bucket</Button>
+                        <Button style={{width: "25%"}}>2. Delivery & Payment</Button>
+                        <Button style={{width: "25%"}}>3. Review & Confirm</Button>
+                        <Button style={{width: "25%"}}>4. All Done!</Button>
                     </Col>
                 </Row>
                 <br/>
@@ -172,9 +191,9 @@ export default class shoppingCart extends React.Component {
                                 <td colSpan={6} style={{fontWeight: "bold"}}>
                                     <div className={"text-left float-right"}>
                                         <div>{"Subtotal = NZD $"}
-                                        {parseFloat(Math.round(this.state.subtotal * 100) / 100).toFixed(2)}
-                                        {" / RMB ￥"}
-                                        {parseFloat(Math.round(this.state.subtotal * 5 * 100) / 100).toFixed(2)}
+                                            {parseFloat(Math.round(this.state.subtotal * 100) / 100).toFixed(2)}
+                                            {" / RMB ￥"}
+                                            {parseFloat(Math.round(this.state.subtotal * 5 * 100) / 100).toFixed(2)}
                                         </div>
                                         <div>{"Product Weight: to be added"}</div>
                                     </div>
@@ -186,10 +205,14 @@ export default class shoppingCart extends React.Component {
                         </Table>
                     </Col>
                 </Row>
-                <hr/>
+                <br/>
                 <Row>
                     <Col xs={12}>
-                        <Link to={routes.DELIVERY_PAYMENT}><Button color={"primary"} className={"float-right"}>Check Out</Button></Link>
+                        <div style={{float: "right"}}>
+                            <Link to={routes.DELIVERY_PAYMENT}>
+                                <Button color={"primary"}>Check Out</Button>
+                            </Link>
+                        </div>
                     </Col>
                 </Row>
                 <Row>

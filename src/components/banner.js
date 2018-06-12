@@ -2,12 +2,9 @@ import React, {Component} from 'react';
 import {Container, Row, Col, Button, ButtonGroup} from 'reactstrap';
 import {
     InputGroup,
-    InputGroupAddon,
-    Input,
-    Form,
     FormGroup,
-    Label,
-} from 'reactstrap';
+    FormControl,
+} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 import {Route, Switch} from 'react-router';
 import SearchIcon from '@material-ui/icons/Search';
@@ -57,25 +54,22 @@ export default class banner extends Component {
                              alt="Website logo"/>
                     </Col>
                     <Col xs={12} md={8} lg={6}>
-                        <InputGroup>
-                            <Input type={"text"} name={"searchMyshop"} placeholder="Search My Shop"
-                                   onChange={this._handleChange}/>
-
-                            <InputGroupAddon addonType="append">
-                                <Link to={'/searchresults'}>
-                                    <Button color="primary"><SearchIcon/></Button>
-                                </Link>
-                            </InputGroupAddon>
-                        </InputGroup>
+                        <FormGroup>
+                            <InputGroup>
+                                <FormControl type="text" name={"searchMyshop"} placeholder={"Search My Shop"}/>
+                                <InputGroup.Addon>
+                                    <Link to={'/searchresults'}>
+                                        <SearchIcon style={{height: "10%"}}/>
+                                    </Link>
+                                </InputGroup.Addon>
+                            </InputGroup>
+                        </FormGroup>
                     </Col>
                     <Col xs={12} md={8} lg={3}>
                         <img width="100%"
                              src={routes.LOGO_2}
                              alt="Website logo"/>
                     </Col>
-                    <Switch>
-                        <Route path='/searchresults' render={() => <SearchResults keyword={keyword}/>}/>
-                    </Switch>
                 </Row>
             </Container>
         );

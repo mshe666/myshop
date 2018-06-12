@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {
+    Navbar,
     Nav,
     NavItem,
-    NavLink,
     Button,
-} from 'reactstrap';
+    Glyphicon
+} from 'react-bootstrap';
 
 import * as routes from '../constants/routes';
 import AuthUserContext from './AuthUserContext';
@@ -23,64 +24,60 @@ const header = () =>
 
 
 const Header_en_onAuth = () =>
-    <Nav tabs>
-        <NavItem>
-            <NavLink href={routes.LANDING}>Home</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.WELLNESS}>Wellness</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.BABY}>Baby</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.BEAUTY}>Beauty</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.PROFILE}>Profile</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.SIGN_UP}>Sign Up</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.SIGN_IN}>Sign In</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.ADMIN_HOME}>Admin</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.SHOPPING_CART}><Button color="primary"><ShoppingCart/></Button></NavLink>
-        </NavItem>
-        <NavItem>
-            <SignOutButton/>
-        </NavItem>
-    </Nav>
+    <Navbar>
+        <Nav bsStyle="tabs">
+            <NavItem href={routes.LANDING}>
+                Home
+            </NavItem>
+            <NavItem href={routes.WELLNESS}>
+                Wellness
+            </NavItem>
+            <NavItem href={routes.BABY}>
+                Baby
+            </NavItem>
+            <NavItem href={routes.BEAUTY}>
+                Beauty
+            </NavItem>
+            <NavItem href={routes.PROFILE}>
+                Profile
+            </NavItem>
+            <NavItem href={routes.ADMIN_HOME}>
+                Admin
+            </NavItem>
+            <NavItem href={routes.SHOPPING_CART}>
+                <Glyphicon glyph="shopping-cart" />
+            </NavItem>
+            <NavItem>
+                <SignOutButton/>
+            </NavItem>
+        </Nav>
+    </Navbar>
 
 
 const Header_en = () =>
-    <Nav tabs>
-        <NavItem>
-            <NavLink href={routes.LANDING}>Home</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.WELLNESS}>Wellness</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.BABY}>Baby</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.BEAUTY}>Beauty</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.SIGN_UP}>Sign Up</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href={routes.SIGN_IN}>Sign In</NavLink>
-        </NavItem>
-        <NavItem>
-            <SignOutButton/>
-        </NavItem>
-    </Nav>
+    <Navbar>
+        <Nav bsStyle="tabs">
+            <NavItem href={routes.LANDING}>
+                Home
+            </NavItem>
+            <NavItem href={routes.WELLNESS}>
+                Wellness
+            </NavItem>
+            <NavItem href={routes.BABY}>
+                Baby
+            </NavItem>
+            <NavItem href={routes.BEAUTY}>
+                Beauty
+            </NavItem>
+            <NavItem href={routes.SIGN_UP}>
+                Sign Up
+            </NavItem>
+            <NavItem href={routes.SIGN_IN}>
+                Sign In
+            </NavItem>
+
+        </Nav>
+    </Navbar>
 
 
 export default header;

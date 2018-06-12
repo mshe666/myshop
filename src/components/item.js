@@ -1,11 +1,8 @@
 import React, {Component} from 'react';
-import {
-    Card, CardText, CardBody, CardHeader,
-    CardTitle, CardSubtitle, Button,
-} from 'reactstrap';
 import {Container, Row, Col} from 'reactstrap';
 import firebase from "../firebase/firebase";
 import './item.css';
+import {Panel, Button, Glyphicon} from 'react-bootstrap';
 
 class item extends Component {
 
@@ -22,13 +19,15 @@ class item extends Component {
         if (item.pstore > 0) {
 
             return (
-                <Button color={"danger"} onClick={this._addToCart.bind(this, this.props.uid, this.props.cart, this.props.item.pid, this.props.item)}>Add to Cart</Button>
+                <Button style={{float: "right"}}
+                        onClick={this._addToCart.bind(this, this.props.uid, this.props.cart, this.props.item.pid, this.props.item)}>
+                    <Glyphicon glyph="shopping-cart" /></Button>
             );
         } else {
 
 
             return (
-                <Button color={"secondary"}>WaitList</Button>
+                <Button  style={{float: "right"}}><Glyphicon glyph="bell" /></Button>
             );
         }
     };
@@ -46,22 +45,20 @@ class item extends Component {
 
             <Col xs={12} md={8} lg={4}>
                 <div>
-                    <Card>
-                        <CardHeader tag="h8">{item.pname.length > 25 ? item.pname.substring(0, 22) + "..." : item.pname}</CardHeader>
-                        {/*<CardBody className={"text-left"}>*/}
-                            {/*/!*<CardTitle>{item.pname}</CardTitle>*!/*/}
-                            {/*<CardSubtitle>{item.pbrand} | {item.psubcate}</CardSubtitle>*/}
-                        {/*</CardBody>*/}
-                        <img width="100%"
-                             src={item.pimage}
-                             alt="Card image cap"/>
-                        <CardBody className={"text-left"}>
-                            <CardText className={"item_price text-left"}>{"NZD $"}{item.pprice}{" / RMB ￥"}{item.pprice * 5}</CardText>
-                            <Button color={"info"}>WishList</Button>
-                            <span>&nbsp;&nbsp;</span>
+                    <Panel bsStyle="info">
+                        <Panel.Heading>
+                            <Panel.Title
+                                componentClass="h3">{item.pname.length > 30 ? item.pname.substring(0, 27) + "..." : item.pname}</Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Body>
+                            <img width="100%"
+                                 src={item.pimage}
+                                 alt="Card image cap"/>
+                            <p style={{marginTop: "5px", color: "red"}}>{"NZD $"}{item.pprice}{" / RMB ￥"}{item.pprice * 5}</p>
+                            <Button style={{float: "left"}}><Glyphicon glyph="heart" /></Button>
                             {this._checkStore(item)}
-                        </CardBody>
-                    </Card>
+                        </Panel.Body>
+                    </Panel>
 
                 </div>
             </Col>
