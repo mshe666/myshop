@@ -13,6 +13,7 @@ import Category from './screens/category';
 import Profile from './screens/profile';
 import ShoppingCart from './screens/shoppingCart';
 import DeliveryPayment from './screens/deliveryAndPayment';
+import ReviewAndConfirmation from './screens/reviewAndConfirmation';
 import Signup from './screens/signup';
 import Signin from './screens/signin';
 import Admin from './screens/admin';
@@ -37,6 +38,7 @@ const App = () =>
             <Route path={routes.CATEGORY} component={() => <Category/>}/>
             <Route path={routes.SHOPPING_CART} component={() => <ShoppingCart/>}/>
             <Route path={routes.DELIVERY_PAYMENT} component={() => <DeliveryPayment/>}/>
+            <Route path={routes.REWVIEW_CONFIRM} component={() => <ReviewAndConfirmation/>}/>
             <Route path={routes.PROFILE} component={() => <Profile/>}/>
             <Route path={routes.SIGN_UP} component={() => <Signup/>}/>
             <Route path={routes.SIGN_IN} component={() => <Signin/>}/>
